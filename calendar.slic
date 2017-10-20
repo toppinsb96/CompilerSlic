@@ -1,0 +1,13 @@
+main;
+   data:
+      integer: year;
+      integer: displayYear;
+      integer: month;
+      integer: day;
+      integer: m, y, c;
+      integer: temp;
+      integer: weekday;
+      integer: count, i;
+      integer: monthSize[13];
+   algorithm:
+end main;

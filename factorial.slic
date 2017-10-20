@@ -1,0 +1,7 @@
+Main;
+   Data:
+      Integer: x, y[10], taco;
+      Real: z;
+   ALGORITHM:
+
+End Main;
