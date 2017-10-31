@@ -10,4 +10,5 @@ main;
       integer: count, i;
       integer: monthSize[13];
    algorithm:
+      month := m + y;
 end main;

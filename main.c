@@ -13,16 +13,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "symbol.h"
+#include "ast.h"
+#include "gen.h"
 
-main()
+int main()
 {
     if(yyparse())
     {
-       printf("ERROR! \n");
+
+      printf("ERROR! \n");
     }
     else
     {
-        displayTable();
+      generateISP(SymbolTable, numOfVar);
+      //printf("I'm here\n");
+      generateCode(root);
+      //displayTable();
+      printInstructions();
     }
     return 0;
 }

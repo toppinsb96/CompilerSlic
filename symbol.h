@@ -12,10 +12,8 @@ typedef struct variable {
 } var;
 
 // SymbolTable
-// i  = iteration for SymbolTable
-// pc = program counter for variables
-extern struct variable SymbolTable[300];
+extern struct variable SymbolTable[1000];
 extern int numOfVar;
-
 int insert(char* nameVar, int typeVar, int size);
 void displayTable();
+struct variable lookup(char* value);

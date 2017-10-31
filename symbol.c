@@ -4,9 +4,7 @@
 #include "symbol.h"
 
 // SymbolTable
-// i  = iteration for SymbolTable
-// pc = program counter for variables
-struct variable SymbolTable[300];
+struct variable SymbolTable[1000];
 int numOfVar  = 0;
 int addrSize  = 0;
 
@@ -14,7 +12,7 @@ int insert(char* nameVar, int typeVar, int size)
 {
     for(int i = 0; i < numOfVar; i++)
     {
-      struct variable iter = SymbolTable[i];
+        struct variable iter = SymbolTable[i];
         if(strcmp(iter.name, nameVar) == 0)
         {
             return 1;
@@ -30,6 +28,19 @@ int insert(char* nameVar, int typeVar, int size)
     addrSize += size;
     numOfVar++;
     return 0;
+}
+// possible Debug
+struct variable lookup(char* value)
+{
+
+    for(int i = 0; i < numOfVar; i++)
+    {
+        if(strcmp(SymbolTable[i].name, value) == 0)
+        {
+          return SymbolTable[i];
+        }
+    }
+    return SymbolTable[numOfVar + 1]; // returns an empty struct
 }
 void displayTable()
 {

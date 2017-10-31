@@ -9,6 +9,7 @@
  * ========================================================================
  */
   #include <stdio.h>
+  #include <string.h>
   #include "y.tab.h"
 %}
 
@@ -31,15 +32,28 @@
                                                           yylval.d = atoi(yytext);
                                                           return(INTCONSTANT);
                                                       }
-[-+]?([0-9]\.[0-9])|([0-9]+(\.[0-9]+)?[Ee][-+][0-9]+) { return(FLOATCONSTANT); }
-\"([\^]|\"\")*\"                                      { return(STRCHARCONSTANT); }
+[-+]?([0-9]\.[0-9])|([0-9]+(\.[0-9]+)?[Ee][-+][0-9]+) {
+                                                          yylval.f = atof(yytext);
+                                                          return(FLOATCONSTANT);
+                                                      }
+\"([\^]|\"\")*\"                                      {
+                                                        char* cpytext = yytext;
+                                                        cpytext++;
+                                                        int len = strlen(cpytext);
+                                                        yylval.s = strdup(yytext);
+                                                        strncpy(yylval.s, cpytext, len-1);
+                                                        yylval.s[len-1] = '\0';
+                                                        yylval.s = strdup(yytext);
+
+                                                        return(STRCHARCONSTANT);
+                                                      }
 [\t ]+                                                { }
 !                                                     { return(CARRIAGE); }
 #.*                                                   { }
 ;                                                     { return(ENDST); }
 :                                                     { return(COLON); }
-\(                                                    { return(BEGINPARENTHESIS); }
-\)                                                    { return(ENDPARENTHESIS); }
+\(                                                    { return(BEGINPAREN); }
+\)                                                    { return(ENDPAREN); }
 ,                                                     { return(COMMA); }
 \[                                                    { return(LBRACKET); }
 \]                                                    { return(RBRACKET); }
@@ -47,25 +61,25 @@
 [Ii][Nn][Tt][Ee][Gg][Ee][Rr]                          { return(INTEGER); }
 [Rr][Ee][Aa][Ll]                                      { return(REAL); }
 [A-Za-z][A-Za-z0-9]*                                  {
-                                                          yylval.str = strdup(yytext);
+                                                          yylval.s = strdup(yytext);
                                                           return(VARIABLE);
                                                       }
-"+"                                                   { return(ADDITION); }
-"-"                                                   { return(SUBTRACTION); }
-"*"                                                   { return(MULTIPLICATION); }
-"/"                                                   { return(DIVISION); }
-"%"                                                   { return(MODULUS); }
-"<"                                                   { return(LESSTHAN); }
-">"                                                   { return(GREATERTHAN); }
-"<="                                                  { return(LESSEQUAL); }
-">="                                                  { return(GREATEREQUAL); }
-"="                                                   { return(EQUAL); }
-"<>"                                                  { return(NOTEQUAL); }
+"+"                                                   { return(ADD); }
+"-"                                                   { return(SUB); }
+"*"                                                   { return(MUL); }
+"/"                                                   { return(DIV); }
+"%"                                                   { return(MOD); }
+"<"                                                   { return(LT); }
+">"                                                   { return(GT); }
+"<="                                                  { return(LE); }
+">="                                                  { return(GE); }
+"="                                                   { return(EQ); }
+"<>"                                                  { return(NEQ); }
 "&"                                                   { return(AND); }
 "|"                                                   { return(OR); }
 "~"                                                   { return(NOT); }
 ":="                                                  { return(ASSIGNMENT); }
 \n                                                    { }
-.                                                     { }
+.                                                     { return(WHITESPACE); }
 
 %%

@@ -3,5 +3,5 @@ Main;
       Integer: x, y[10], taco;
       Real: z;
    ALGORITHM:
-
+      z := 5.5;
 End Main;
