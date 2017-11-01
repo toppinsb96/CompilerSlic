@@ -7,6 +7,8 @@
 int ISP_MEMORY_SIZE = 0;
 char* instructions[10000];
 int index_ins = 0;
+int divisorLoc;
+int dividendLoc;
 
 ast* root;
 
@@ -17,11 +19,19 @@ void generateCode(ast* a)
         printf("EMPTY ALGORITHM SECTION");
         return;
     }
+    createModMemory();
     do
     {
         generateAssign(a);
         a = a->next;
     } while(a);
+}
+void createModMemory()
+{
+    /*
+    divisorLoc = index_ins;
+    dividendLoc = index_ins + 1;
+    index_ins += 2; // creates two slots in memory for modulos expressions*/
 }
 void generateAssign(ast *a)
 {
@@ -55,9 +65,16 @@ int generateVar(ast *a)
 
     if(var.size > 1)
     {
-        //TODO: Array size computation -- generateExpr
+        int type = generateExpr(a->cond);
+        if(type == FLOATCONSTANT)
+        {
+            addCode("FTI");
+        }
+        addCode("ADI"); // adds address + offset
     }
-    return 0; //TODO: return Variable code
+
+    if(var.type == 0) { return INTCONSTANT; }
+    else { return FLOATCONSTANT; }
 }
 int generateExpr(ast *a)
 {
@@ -77,7 +94,9 @@ int generateExpr(ast *a)
     }
     else if(a->type == VARIABLE)
     {
-        //TODO: Handle variables and Arrays
+        int type = generateVar(a);
+        addCode("LOD");
+        return type;
     }
     else if(a->cond)
     {
@@ -123,6 +142,7 @@ int generateExpr(ast *a)
     else if(a->type == MOD)
     {
         //TODO: Modulos
+        modulos(a);
     }
     else
     {
@@ -134,10 +154,10 @@ int generateExpr(ast *a)
         int intChecker = 1;
         if(left == INTCONSTANT && right == FLOATCONSTANT)
         {
-          addCode(leftCastPos, "ITF");
+          insertCode("ITF", castPos);
           intChecker = 0;
         }
-        else if(leftType == FLOATCONSTANT && rightType == INTCONSTANT)
+        else if(left == FLOATCONSTANT && right == INTCONSTANT)
         {
           addCode("ITF");
           intChecker = 0;
@@ -154,9 +174,9 @@ int generateExpr(ast *a)
                   addCode("LTI"); break;
                 case GT:
                   addCode("GTI"); break;
-                case LTE:
+                case LE:
                   addCode("LEI"); break;
-                case GTE:
+                case GE:
                   addCode("GEI"); break;
                 case OR:
                   addCode("ADI"); break;
@@ -184,9 +204,9 @@ int generateExpr(ast *a)
                   addCode("LTF"); break;
                 case GT:
                   addCode("GTF"); break;
-                case LTE:
+                case LE:
                   addCode("LEF"); break;
-                case GTE:
+                case GE:
                   addCode("GEF"); break;
                 case OR:
                   addCode("ADF"); break;
@@ -212,6 +232,19 @@ int generateExpr(ast *a)
     }
     return WHITESPACE;
 }
+int modulos(ast* a)
+{
+
+    // a = aab/b*-
+    int left = generateExpr(a->left);
+    int left2 = generateExpr(a->left);   // TODO: Figure out how to not have to re-evaluate
+    int right = generateExpr(a->right);
+    addCode("DVI");
+    int right2 = generateExpr(a->right); // TODO: Figure out how to not have to re-evaluate
+    addCode("MLI");
+    addCode("SBI");
+    return INTCONSTANT;
+}
 void generateISP(struct variable *SymbolTable, int numOfVar)
 {
     char *ISP_IN = malloc(sizeof(char) * 50);;
@@ -223,9 +256,20 @@ void generateISP(struct variable *SymbolTable, int numOfVar)
     instructions[index_ins] = ISP_IN;
     index_ins++;
 }
+
 void addCode(char* str)
 {
     instructions[index_ins] = str;
+    index_ins++;
+}
+void insertCode(char* str, int pos)
+{
+    for(int i = index_ins; i > pos; i--)
+    {
+        instructions[i+1] = instructions[i];
+    }
+    //BUG: Possible bug with the pos+1
+    instructions[pos] = str;
     index_ins++;
 }
 void printInstructions()
