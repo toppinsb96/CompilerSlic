@@ -44,12 +44,12 @@ extern int yydebug;
 
   #include "symbol.h"
   #include "ast.h"
-  #include "y.tab.h"
+  //#include "y.tab.h"
 
   char* yytext;
   extern int symbolType;
   extern ast* root;
-  ast* newExp(int type, ast *left, ast *right);
+  ast* newExp(int type, ast *left, ast *right, ast* cond);
 
 #line 55 "y.tab.h" /* yacc.c:1915  */
 

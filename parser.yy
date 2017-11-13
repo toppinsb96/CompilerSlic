@@ -20,12 +20,12 @@ int yyerror();
 {
   #include "symbol.h"
   #include "ast.h"
-  #include "y.tab.h"
+  //#include "y.tab.h"
 
   char* yytext;
   extern int symbolType;
   extern ast* root;
-  ast* newExp(int type, ast *left, ast *right);
+  ast* newExp(int type, ast *left, ast *right, ast* cond);
 }
 
 
@@ -85,6 +85,7 @@ int yyerror();
 
 %type    <a>  algosect;
 %type    <a>  stmlist;
+%type    <a>  stmitem;
 %type    <a>  assignment;
 %type    <a>  expr;
 %type    <a>  compare;
@@ -97,7 +98,8 @@ int yyerror();
 %type    <a>  print;
 %type    <a>  printlst;
 %type    <a>  printitem;
-
+%type    <a>  conditional;
+%type    <a>  read;
 %%
 prog        : explist
             ;
@@ -153,39 +155,42 @@ varlist     : VARIABLE ENDST
 algosect    : ALGORITHM COLON stmlist   { $$ = $3; }
             | ALGORITHM COLON           { $$ = NULL; }
             ;
-stmlist     : stmlist ENDST             { $$ = $1; }
-            | stmlist ENDST stmlist     { $1->next = $3; $$ = $1; }
-            | assignment                { $$ = $1; }
-            | print                     { $$ = $1; }
+stmlist     : stmitem ENDST             { $$ = $1; }
+            | stmitem ENDST stmlist     { $1->next = $3; $$ = $1; }
             ;
-assignment  : var ASSIGNMENT expr       { $$ = newExp(ASSIGNMENT, $1, $3); }
+stmitem     : assignment                { $$ = $1; }
+            | print                     { $$ = $1; }
+            | read                      { $$ = $1; }
+            | conditional               { $$ = $1; }
+            ;
+assignment  : var ASSIGNMENT expr       { $$ = newExp(ASSIGNMENT, $1, $3, NULL); }
             ;
 expr        : logic
             ;
-logic       : logic OR compare          { $$ = newExp(OR, $1, $3); }
-            | logic AND compare         { $$ = newExp(AND, $1, $3); }
-            | NOT compare               { $$ = newExp(NOT, NULL, $2); }
+logic       : logic OR compare          { $$ = newExp(OR, $1, $3, NULL); }
+            | logic AND compare         { $$ = newExp(AND, $1, $3, NULL); }
+            | NOT compare               { $$ = newExp(NOT, NULL, $2, NULL); }
             | compare                   { $$ = $1; }
             ;
 
-compare     : compare EQ op             { $$ = newExp(EQ, $1, $3); }
-            | compare NEQ op            { $$ = newExp(NEQ, $1, $3); }
-            | compare LT op             { $$ = newExp(LT, $1, $3); }
-            | compare GT op             { $$ = newExp(GT, $1, $3); }
-            | compare LE op             { $$ = newExp(LE, $1, $3); }
-            | compare GE op             { $$ = newExp(GE, $1, $3); }
+compare     : compare EQ op             { $$ = newExp(EQ, $1, $3, NULL); }
+            | compare NEQ op            { $$ = newExp(NEQ, $1, $3, NULL); }
+            | compare LT op             { $$ = newExp(LT, $1, $3, NULL); }
+            | compare GT op             { $$ = newExp(GT, $1, $3, NULL); }
+            | compare LE op             { $$ = newExp(LE, $1, $3, NULL); }
+            | compare GE op             { $$ = newExp(GE, $1, $3, NULL); }
             | op                        { $$ = $1; }
             ;
-op          : op ADD iter               { $$ = newExp(ADD, $1, $3); }
-            | op SUB iter               { $$ = newExp(SUB, $1, $3); }
+op          : op ADD iter               { $$ = newExp(ADD, $1, $3, NULL); }
+            | op SUB iter               { $$ = newExp(SUB, $1, $3, NULL); }
             | iter                      { $$ = $1; }
             ;
-iter        : iter MUL factor           { $$ = newExp(MUL, $1, $3); }
-            | iter DIV factor           { $$ = newExp(DIV, $1, $3); }
-            | iter MOD factor           { $$ = newExp(MOD, $1, $3); }
+iter        : iter MUL factor           { $$ = newExp(MUL, $1, $3, NULL); }
+            | iter DIV factor           { $$ = newExp(DIV, $1, $3, NULL); }
+            | iter MOD factor           { $$ = newExp(MOD, $1, $3, NULL); }
             | factor                    { $$ = $1; }
             ;
-factor      : SUB factor                { $$ = newExp(SUB, NULL, $2); }
+factor      : SUB factor                { $$ = newExp(SUB, NULL, $2, NULL); }
             | BEGINPAREN expr ENDPAREN  { $$ = $2; }
             | atom                      { $$ = $1; }
             ;
@@ -215,9 +220,7 @@ var         : VARIABLE                  {
                                           $$->cond = $3;
                                         }
             ;
-print       : PRINT printlst            {
-                                          $$ = $2;
-                                        }
+print       : PRINT printlst            { $$ = newExp(PRINT, NULL, $2, NULL); }
             ;
 printlst    : printitem COMMA printlst  {
                                           $1->next = $3;
@@ -236,22 +239,29 @@ printitem   : expr                      { $$ = $1; }
                                           $$->type = CARRIAGE;
                                         }
             ;
+read        : READ var                  { $$ = newExp(READ, $2, NULL, NULL); }
+            ;
+conditional : IF expr ENDST stmlist END IF
+                                        { $$ = newExp(IF, $4, NULL, $2); }
+
+            | IF expr ENDST stmlist ELSE ENDST stmlist END IF
+                                        { $$ = newExp(IF, $4, $7, $2); }
+            ;
 %%
 
 int symbolType;
 
-ast* newExp(int type, ast *left, ast *right)
+ast* newExp(int type, ast *left, ast *right, ast* cond)
 {
-	ast *result = (ast *)malloc(sizeof(ast));
-	result->type = type;
-	result->left = left;
-	result->right = right;
-	return result;
+    ast *result = (ast *)malloc(sizeof(ast));
+    result->type = type;
+    result->left = left;
+    result->right = right;
+    result->cond = cond;
+    return result;
 }
 int yyerror()
 {
     printf("Called yyerror()%s\n", yytext);
     return 0;
 }
-//struct SymbolTable s = lookup(VARIABLE);
-//if(strcmp(s.name, NULL) == 0) { YYERROR; }

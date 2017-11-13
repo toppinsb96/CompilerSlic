@@ -1,0 +1,12 @@
+
+main;
+	data:
+		integer: Temp,Size, List[10];
+
+	algorithm:
+		Size := 10;
+
+		List[5] := Temp;
+
+
+end main;

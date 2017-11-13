@@ -8,6 +8,7 @@ void createModMemory();
 void generateAssign(ast *a);
 int generateVar(ast *a);
 int generateExpr(ast *a);
+void generatePrinting(ast* a);
 int modulos(ast* a);
 void generateISP(struct variable *SymbolTable, int numOfVar);
 void addCode(char* str);

@@ -36,7 +36,7 @@
                                                           yylval.f = atof(yytext);
                                                           return(FLOATCONSTANT);
                                                       }
-\"([\^]|\"\")*\"                                      {
+\"([^\n\r\"]|\"\")*\"                                 {
                                                         char* cpytext = yytext;
                                                         cpytext++;
                                                         int len = strlen(cpytext);

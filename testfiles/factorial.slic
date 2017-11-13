@@ -3,10 +3,6 @@ Main;
       Integer: x, y[10], taco;
       Real: z;
    ALGORITHM:
-      z := 5.5;
-      x := 5;
-      taco := 8;
 
-    
 
 End Main;

@@ -1,14 +1,7 @@
 main;
    data:
-      integer: year;
-      integer: displayYear;
-      integer: month;
-      integer: day;
-      integer: m, y, c;
-      integer: temp;
-      integer: weekday;
-      integer: count, i;
-      integer: monthSize[13];
+      real: year;
    algorithm:
-      month := m + y;
+      year := 5;
+      read year;
 end main;

@@ -16,12 +16,13 @@ void generateCode(ast* a)
 {
     if(!root)
     {
-        printf("EMPTY ALGORITHM SECTION");
+        printf("EMPTY ALGORITHM SECTION\n");
         return;
     }
     createModMemory();
     do
     {
+
         generateAssign(a);
         a = a->next;
     } while(a);
@@ -35,6 +36,7 @@ void createModMemory()
 }
 void generateAssign(ast *a)
 {
+    //printf("generateAssign: type is: %d, printtype: %d\n", a->type, PRINT);
     if(a->type == ASSIGNMENT)
     {
         int L = generateVar(a->left);
@@ -52,7 +54,23 @@ void generateAssign(ast *a)
     }
     else if(a->type == PRINT)
     {
-        //generatePrintList(a->left);
+        generatePrinting(a->right);
+    }
+    else if(a->type == READ)
+    {
+        int type = generateVar(a->left);
+
+        if (type == INTCONSTANT) { addCode("INI"); }
+        else                     { addCode("INF"); }
+        addCode("STO");
+    }
+    else if(a->type == IF)
+    {
+
+    }
+    else
+    {
+        printf("\n\nAt the end of the generateAssign function.\n\n");
     }
 }
 int generateVar(ast *a)
@@ -65,11 +83,13 @@ int generateVar(ast *a)
 
     if(var.size > 1)
     {
+
         int type = generateExpr(a->cond);
         if(type == FLOATCONSTANT)
         {
             addCode("FTI");
         }
+        //printf("adding code?");
         addCode("ADI"); // adds address + offset
     }
 
@@ -232,6 +252,43 @@ int generateExpr(ast *a)
     }
     return WHITESPACE;
 }
+void generatePrinting(ast* a)
+{
+    //printf("type: %d, strchar: %d\n", a->type, STRCHARCONSTANT);
+    do {
+      if(a->type == STRCHARCONSTANT)
+      {
+          addCode("NOP ; Printing");
+          int len = strlen(a->c);
+
+          for(int i = 0; i < len; i++)
+          {
+              char* codeStr = malloc(sizeof(char) * 50);
+              char c = a->c[i];
+              sprintf(codeStr, "LLI %d", (int)c);
+              addCode(codeStr);
+              addCode("PTC");
+          }
+      }
+      else if(a->type == CARRIAGE)
+      {
+          addCode("PTL");
+      }
+      else if(a->type)
+      {
+          int type = generateExpr(a);
+          if(type == INTCONSTANT)
+          {
+            addCode("PTI");
+          }
+          else if(type == FLOATCONSTANT)
+          {
+            addCode("PTF");
+          }
+      }
+      a = a->next;
+    } while(a);
+}
 int modulos(ast* a)
 {
 
@@ -259,6 +316,7 @@ void generateISP(struct variable *SymbolTable, int numOfVar)
 
 void addCode(char* str)
 {
+
     instructions[index_ins] = str;
     index_ins++;
 }
