@@ -100,6 +100,8 @@ int yyerror();
 %type    <a>  printitem;
 %type    <a>  conditional;
 %type    <a>  read;
+%type    <a>  exit;
+%type    <a>  whileStm;
 %%
 prog        : explist
             ;
@@ -162,6 +164,8 @@ stmitem     : assignment                { $$ = $1; }
             | print                     { $$ = $1; }
             | read                      { $$ = $1; }
             | conditional               { $$ = $1; }
+            | exit                      { $$ = $1; }
+            | whileStm                  { $$ = $1; }
             ;
 assignment  : var ASSIGNMENT expr       { $$ = newExp(ASSIGNMENT, $1, $3, NULL); }
             ;
@@ -247,6 +251,10 @@ conditional : IF expr ENDST stmlist END IF
             | IF expr ENDST stmlist ELSE ENDST stmlist END IF
                                         { $$ = newExp(ELSE, $4, $7, $2); }
             ;
+whileStm    : WHILE expr ENDST stmlist END WHILE
+                                        { $$ = newExp(WHILE, $4, NULL, $2); }
+            ;
+exit        : EXIT                      { $$ = newExp(EXIT, NULL, NULL, NULL); }
 %%
 
 int symbolType;

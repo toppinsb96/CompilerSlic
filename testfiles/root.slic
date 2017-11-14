@@ -7,10 +7,7 @@ main;
 	algorithm:
 		x := 5;
 
-		if (x = 5);
-			x := 5 + 4;
-			N := 5 + 4;
-		else;
-			print "else",!;
-		end if;
+		while (x = 5);
+			print "Inside While",!;
+		end while;
 end main;

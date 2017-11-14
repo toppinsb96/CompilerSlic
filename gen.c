@@ -100,6 +100,26 @@ void generateAssign(ast *a)
         insertCode(jump2, castPos2);
         addCode("NOP ; end if");
     }
+    else if(a->type == EXIT)
+    {
+        addCode("HLT");
+    }
+    else if(a->type == WHILE)
+    {
+        char* JPFvar = malloc(sizeof(char) * 50);
+        char* JMPvar = malloc(sizeof(char) * 50);
+        addCode("NOP ; WHILE");
+        int castPos = index_ins;
+        generateExpr(a->cond);
+        addCode("NOP ; Replace for JPF");
+        int castPos2 = index_ins;
+        generateCode(a->left);
+        sprintf(JMPvar, "JMP %d ; JUMP TO START", castPos);
+        addCode(JMPvar);
+        sprintf(JPFvar, "JPF %d ; JUMP TO END IF FALSE", index_ins);
+        insertCode(JPFvar, castPos2-1);
+        addCode("End While");
+    }
     else
     {
         printf("\n\nAt the end of the generateAssign function.\n\n");
