@@ -245,7 +245,7 @@ conditional : IF expr ENDST stmlist END IF
                                         { $$ = newExp(IF, $4, NULL, $2); }
 
             | IF expr ENDST stmlist ELSE ENDST stmlist END IF
-                                        { $$ = newExp(IF, $4, $7, $2); }
+                                        { $$ = newExp(ELSE, $4, $7, $2); }
             ;
 %%
 

@@ -1757,7 +1757,7 @@ yyreduce:
 
   case 58:
 #line 248 "parser.yy" /* yacc.c:1661  */
-    { (yyval.a) = newExp(IF, (yyvsp[-5].a), (yyvsp[-2].a), (yyvsp[-7].a)); }
+    { (yyval.a) = newExp(ELSE, (yyvsp[-5].a), (yyvsp[-2].a), (yyvsp[-7].a)); }
 #line 1762 "y.tab.c" /* yacc.c:1661  */
     break;
 

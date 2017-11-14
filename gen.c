@@ -66,7 +66,39 @@ void generateAssign(ast *a)
     }
     else if(a->type == IF)
     {
+        char* jump = malloc(sizeof(char) * 50);
+        addCode("NOP ; if statement");
 
+        int type = generateExpr(a->cond);
+        if(type == FLOATCONSTANT) { addCode("FTI"); }
+        addCode("NOP ; replace for JPF");
+        int castPos = index_ins-1;
+        generateCode(a->left);
+        addCode("NOP ; end if");
+        sprintf(jump, "JPF %d", index_ins-1);
+        insertCode(jump, castPos);
+    }
+    else if(a->type == ELSE)
+    {
+        char* jump  = malloc(sizeof(char) * 50);
+        char* jump2 = malloc(sizeof(char) * 50);
+
+        addCode("NOP ; if statement");
+
+        int type = generateExpr(a->cond);
+        if(type == FLOATCONSTANT) { addCode("FTI"); }
+        addCode("NOP ; replace for JPF");
+        int castPos = index_ins-1;
+        generateCode(a->left);
+
+        sprintf(jump, "JPF %d ; if", index_ins+2);
+        addCode("NOP ; else");
+        int castPos2 = index_ins;
+        insertCode(jump, castPos);
+        generateCode(a->right);
+        sprintf(jump2, "JMP %d ; else", index_ins);
+        insertCode(jump2, castPos2);
+        addCode("NOP ; end if");
     }
     else
     {
@@ -169,6 +201,7 @@ int generateExpr(ast *a)
         //TODO: Casting
         int left = generateExpr(a->left);
         int castPos = index_ins;
+        addCode("NOP ; Replace for ITF cast");
         int right = generateExpr(a->right);
 
         int intChecker = 1;
@@ -320,15 +353,10 @@ void addCode(char* str)
     instructions[index_ins] = str;
     index_ins++;
 }
-void insertCode(char* str, int pos)
+// NOP Replacer
+void insertCode(char* str, int index)
 {
-    for(int i = index_ins; i > pos; i--)
-    {
-        instructions[i+1] = instructions[i];
-    }
-    //BUG: Possible bug with the pos+1
-    instructions[pos] = str;
-    index_ins++;
+    instructions[index] = str;
 }
 void printInstructions()
 {
