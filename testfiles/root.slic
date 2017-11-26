@@ -6,8 +6,8 @@ main;
 
 	algorithm:
 		x := 5;
+		if (x = 5);
+			print "Hello",!;
+		end if;
 
-		while (x = 5);
-			print "Inside While",!;
-		end while;
 end main;

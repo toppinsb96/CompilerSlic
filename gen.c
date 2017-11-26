@@ -19,20 +19,12 @@ void generateCode(ast* a)
         printf("EMPTY ALGORITHM SECTION\n");
         return;
     }
-    createModMemory();
+
     do
     {
-
         generateAssign(a);
         a = a->next;
     } while(a);
-}
-void createModMemory()
-{
-    /*
-    divisorLoc = index_ins;
-    dividendLoc = index_ins + 1;
-    index_ins += 2; // creates two slots in memory for modulos expressions*/
 }
 void generateAssign(ast *a)
 {
@@ -109,6 +101,7 @@ void generateAssign(ast *a)
         char* JPFvar = malloc(sizeof(char) * 50);
         char* JMPvar = malloc(sizeof(char) * 50);
         addCode("NOP ; WHILE");
+        addCode("NOP ; Replace for JMP");
         int castPos = index_ins;
         generateExpr(a->cond);
         addCode("NOP ; Replace for JPF");
@@ -119,6 +112,49 @@ void generateAssign(ast *a)
         sprintf(JPFvar, "JPF %d ; JUMP TO END IF FALSE", index_ins);
         insertCode(JPFvar, castPos2-1);
         addCode("End While");
+    }
+    else if(a->type == COUNTING)
+    {
+        char* JPFvar = malloc(sizeof(char) * 50);
+        addCode("NOP ; COUNTING");
+        generateVar(a->left);
+        generateExpr(a->cond->left);
+        addCode("STO");
+
+        addCode("NOP ; CHECKING RANGE"); //TODO: POSSIBLE DELETE
+        addCode("NOP ; REPLACE FOR JMP");
+        int comp = index_ins;
+        generateVar(a->left);
+        addCode("LOD");
+        int castPos = index_ins;
+        // COMPARE RIGHTSIDE OF RANGE TO LEFTSIDE
+        int type = generateExpr(a->cond->right);
+        if (type == FLOATCONSTANT)  { addCode("FTI"); }
+
+        //COMPARISON
+        if(a->cond->type == UPWARD) { addCode("LEI"); }
+        else                        { addCode("GEI"); }
+        addCode("NOP ; LOCATION");
+        int castPos2 = index_ins;
+
+        generateCode(a->right);
+
+        // MUTATION
+        addCode("NOP ; MUTATION");
+        generateVar(a->left);
+        generateVar(a->left);
+        addCode("LOD");
+        addCodeStr("LLI %d", 1);
+
+        if(a->cond->type == UPWARD) { addCode("ADI"); }
+        else                        { addCode("SBI");}
+
+        addCode("STO");
+
+        addCodeStr("JMP %d", comp);
+        addCode("NOP ; END COUNTING");
+        sprintf(JPFvar, "JPF %d ; ", index_ins);
+        insertCode(JPFvar, castPos2-1);
     }
     else
     {
@@ -371,6 +407,13 @@ void addCode(char* str)
 {
 
     instructions[index_ins] = str;
+    index_ins++;
+}
+void addCodeStr(char* str, int d)
+{
+    char* codePlacer = malloc(sizeof(char) * 50);
+    sprintf(codePlacer, str, d);
+    instructions[index_ins] = codePlacer;
     index_ins++;
 }
 // NOP Replacer

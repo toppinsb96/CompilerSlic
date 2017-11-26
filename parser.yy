@@ -102,6 +102,8 @@ int yyerror();
 %type    <a>  read;
 %type    <a>  exit;
 %type    <a>  whileStm;
+%type    <a>  counting;
+%type    <a>  bounds;
 %%
 prog        : explist
             ;
@@ -166,6 +168,7 @@ stmitem     : assignment                { $$ = $1; }
             | conditional               { $$ = $1; }
             | exit                      { $$ = $1; }
             | whileStm                  { $$ = $1; }
+            | counting                  { $$ = $1; }
             ;
 assignment  : var ASSIGNMENT expr       { $$ = newExp(ASSIGNMENT, $1, $3, NULL); }
             ;
@@ -255,6 +258,13 @@ whileStm    : WHILE expr ENDST stmlist END WHILE
                                         { $$ = newExp(WHILE, $4, NULL, $2); }
             ;
 exit        : EXIT                      { $$ = newExp(EXIT, NULL, NULL, NULL); }
+            ;
+counting    : COUNTING var bounds ENDST stmlist END COUNTING
+                                        { $$ = newExp(COUNTING, $2, $5, $3); }
+            ;
+bounds      : UPWARD expr TO expr       { $$ = newExp(UPWARD, $2, $4, NULL); }
+            | DOWNWARD expr TO expr     { $$ = newExp(DOWNWARD, $2, $4, NULL); }
+            ;
 %%
 
 int symbolType;
