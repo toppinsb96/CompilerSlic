@@ -1,4 +1,4 @@
-Compiler for a language : Slic
+Compiler for language : Slic
 
 Uses Bison and Yakk for front end and C for backend.
 
